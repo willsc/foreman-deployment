@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${FOREMAN_DB_NAME}
+      POSTGRES_USER: ${FOREMAN_DB_USER}
+      POSTGRES_PASSWORD: ${FOREMAN_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${FOREMAN_DB_USER} -d ${FOREMAN_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - foreman-db:/var/lib/postgresql/data
+
+  foreman:
+    build:
+      context: .
+      args:
+        FOREMAN_IMAGE: ${FOREMAN_IMAGE}
+    restart: unless-stopped
+    hostname: ${FOREMAN_HOSTNAME}
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FOREMAN_DB_HOST: db
+      FOREMAN_DB_PORT: 5432
+      FOREMAN_DB_NAME: ${FOREMAN_DB_NAME}
+      FOREMAN_DB_USER: ${FOREMAN_DB_USER}
+      FOREMAN_DB_PASSWORD: ${FOREMAN_DB_PASSWORD}
+      FOREMAN_HOSTNAME: ${FOREMAN_HOSTNAME}
+      FOREMAN_PUBLIC_URL: ${FOREMAN_PUBLIC_URL}
+      FOREMAN_ADMIN_USER: ${FOREMAN_ADMIN_USER}
+      FOREMAN_ADMIN_PASSWORD: ${FOREMAN_ADMIN_PASSWORD}
+      FOREMAN_ADMIN_EMAIL: ${FOREMAN_ADMIN_EMAIL}
+      PXE_DOMAIN: ${PXE_DOMAIN}
+    ports:
+      - "${FOREMAN_PORT}:3000"
+    volumes:
+      - foreman-data:/var/lib/foreman
+      - foreman-log:/var/log/foreman
+      - foreman-run:/var/run/foreman
+
+volumes:
+  foreman-db:
+  foreman-data:
+  foreman-log:
+  foreman-run:

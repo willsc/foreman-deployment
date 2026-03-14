@@ -1,0 +1,5 @@
+# One winget package id per line.
+# Lines beginning with # are ignored.
+# Example:
+# Microsoft.PowerToys
+# Git.Git

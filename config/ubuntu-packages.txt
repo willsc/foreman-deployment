@@ -1,0 +1,5 @@
+# One Ubuntu package per line.
+# Lines beginning with # are ignored.
+
+openssh-server
+qemu-guest-agent

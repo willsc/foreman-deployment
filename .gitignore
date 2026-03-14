@@ -1,0 +1,8 @@
+.env
+.iso-cache/
+.mnt/
+logs/
+media/
+upstream-forman-deployment/
+__pycache__/
+*.pyc

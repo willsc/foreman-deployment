@@ -1,0 +1,48 @@
+services:
+  dnsmasq:
+    build:
+      context: .
+      dockerfile: dnsmasq/Dockerfile
+    restart: unless-stopped
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      PROXY_DHCP_MODE: ${PROXY_DHCP_MODE}
+      PXE_INTERFACE: ${PXE_INTERFACE}
+      PXE_SUBNET: ${PXE_SUBNET}
+      PXE_NETMASK: ${PXE_NETMASK}
+      PXE_GATEWAY: ${PXE_GATEWAY}
+      PXE_DNS_SERVERS: ${PXE_DNS_SERVERS}
+      PXE_DHCP_RANGE_START: ${PXE_DHCP_RANGE_START}
+      PXE_DHCP_RANGE_END: ${PXE_DHCP_RANGE_END}
+      PXE_NEXT_SERVER: ${PXE_NEXT_SERVER}
+      PXE_BOOTFILE_BIOS: ${PXE_BOOTFILE_BIOS}
+      PXE_BOOTFILE_UEFI: ${PXE_BOOTFILE_UEFI}
+      PXE_DOMAIN: ${PXE_DOMAIN}
+      PROXY_HTTP_URL: ${PROXY_HTTP_URL}
+
+  tftp:
+    build:
+      context: ./tftp
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ${MEDIA_ROOT}/tftpboot:/srv/tftpboot
+
+  httpboot:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${MEDIA_ROOT}:/usr/share/nginx/html:ro
+
+  proxy-api:
+    build:
+      context: ./proxy-api
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      PROXY_DHCP_MODE: ${PROXY_DHCP_MODE}
